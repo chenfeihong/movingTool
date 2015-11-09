@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>运动框架movingTool</title>
+	<style type="text/css"></style>
+	<script type="text/javascript">
+	/**
+	 * 根据css的name 获取css属性
+	 * @param  {[type]} dom  [目标dom元素]
+	 * @param  {[type]} name [description]
+	 * @return {[type]}      [description]
+	 */
+	function getStyleByName(dom, name) {
+		if(dom.currentStyle) {
+			return dom.currentStyle[name];//只获得该dom自己的css属性
+		} else {//如果自己没有该css属性， 则去祖宗那里获取
+			return getComputedStyle(dom,false)[name];//会获取父元素的css属性， 获取祖宗十八代的css属性
+		}
+	}
+
+	/**
+	 * 把一个dom 移动到目标css属性
+	 * @param  {[type]}   dom      [description]
+	 * @param  {[type]}   attrs    [目前css属性， 比如｛width:300,height:400｝]
+	 * @param  {Function} callback [运动完成后的回调]
+	 * @return {[type]}            [description]
+	 */
+	function movingTool(dom, attrs, callback) {
+		// body...
+	}
+
+
+	</script>
+</head>
+<body style="padding:10px;">
+	
+</body>
+</html>
