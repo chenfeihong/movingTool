@@ -3,7 +3,18 @@
 <head>
 	<meta charset="UTF-8">
 	<title>运动框架movingTool</title>
-	<style type="text/css"></style>
+	<style type="text/css">
+	div {
+		position: absolute;
+		width: 100px;
+	}
+	#div1 {
+		background: #ccc;
+	}
+	#div2 {
+		background: #666;
+	}
+	</style>
 	<script type="text/javascript">
 	/**
 	 * 根据css的name 获取css属性
@@ -19,6 +30,14 @@
 		}
 	}
 
+	//去掉val中的px
+	function removePx (val) {
+		if(val && val.indexOf('px') != -1) {
+			return val.substring(0,val.length -2);
+		}
+		return val;
+	}
+
 	/**
 	 * 把一个dom 移动到目标css属性
 	 * @param  {[type]}   dom      [description]
@@ -26,14 +45,57 @@
 	 * @param  {Function} callback [运动完成后的回调]
 	 * @return {[type]}            [description]
 	 */
-	function movingTool(dom, attrs, callback) {
-		// body...
+	function movingTool(dom, attrs, callBack) {
+
+		dom.timer = setInterval(function () {
+			var isEnd = true;
+			for(var attr in attrs) {
+				var curVal = getStyleByName(dom, attr);//当前值
+				
+				if(attr == 'opacity' && curVal) {
+					curVal = curVal *100;//
+				}
+				!curVal && attr=='opacity' && (curVal = '100');//兼容IE的透明度， IE8以下无法通过opacity获取透明度
+				curVal = removePx(curVal + '');//为了ＩＥ８　啊，都是泪
+				curVal = Math.ceil(parseFloat(curVal));//不知道为啥， IE8 走着走着curVal变成了小数...., 没办法调用ceil了
+				var desVal = attrs[attr];//目标值
+				if(curVal != desVal) {
+					var speed = (desVal - curVal) /6;
+					//这里很关键 ， speed一定要取整， 取整可以保证在最后阶段， speed保持取整为1， 那么每次+1， 最终就可以到达目的地了， 如果不取整， 那么speed就是个小数， 那么永远都没法到达目的地了
+					speed = speed > 0 ? Math.ceil(speed) :Math.floor(speed);
+					
+					curVal += speed;
+					if(attr !== 'opacity') {
+						dom.style[attr] = curVal + 'px';
+					} else {//透明度
+						dom.style.opacity = curVal/100;
+						dom.style.filter = 'alpha(opacity:' + curVal + ')';
+					}
+					isEnd = false;//这个false的写法也很精巧哦， 为什么不是一开始初始化为false， 然后改为true, 你需要等到所有属性都运动到目的地才清除定时器
+				} 
+			}
+			if(isEnd == true) {
+				clearInterval(dom.timer);
+				if(callBack && callBack.constructor == Function) {
+					callBack();
+				}
+			}
+		}, 30);
 	}
 
-
+	function test1 () {
+		var dom = document.querySelector('#div1');
+		var dom2 = document.querySelector('#div2');
+		//top: 100, left:500, 
+		movingTool(dom, {top: 100, left:500, opacity: 30}, function() {
+			movingTool(dom2, {top: 100, left:500, opacity: 30});
+		});
+	}
 	</script>
 </head>
 <body style="padding:10px;">
-	
+	<button onclick="test1()">btn1</button>
+	<div id="div1" style="left: 0px; height: 200px;top: 90px;">div1</div>
+	<div id="div2" style="left: 0px; height: 200px; top: 200px;">div2</div>
 </body>
 </html>
